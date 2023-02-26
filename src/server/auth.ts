@@ -20,15 +20,10 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      onboarded: boolean;
+      skippedOnboarding: boolean;
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -39,10 +34,12 @@ declare module "next-auth" {
  **/
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session({ session, user }) {
+    async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
-        // session.user.role = user.role; <-- put other properties on the session here
+        const dbUser = await prisma.user.findFirst({ where: { id: user.id } });
+        session.user.onboarded = dbUser?.onboarded || false;
+        session.user.skippedOnboarding = dbUser?.skippedOnboarding || false;
       }
       return session;
     },

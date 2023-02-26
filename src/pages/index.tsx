@@ -1,66 +1,56 @@
-import { type NextPage } from "next";
+import { GetServerSideProps, type NextPage } from "next";
 import Head from "next/head";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 import { api } from "../utils/api";
+import Header from "../components/Index/Header";
+import Content from "../components/Index/Content";
+import { getServerAuthSession } from "../server/auth";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
-  const habits = api.habits.getHabits.useQuery();
+  const { data: sessionData } = useSession();
+
+  const headMarkup = (
+    <Head>
+      <title>Voy</title>
+      <meta name="description" content="The Voy App" />
+      <link rel="icon" href="/favicon.ico" />
+    </Head>
+  );
+
+  if (sessionData == null) {
+    return (
+      <>
+        {headMarkup}
+        <main className="flex h-full items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] p-10 text-white">
+          <Header />
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
-      <Head>
-        <title>Voy</title>
-        <meta name="description" content="The Voy App" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="py-16">
-          <h2 className="text-3xl">Your habits</h2>
-          <div>
-            {habits.data
-              ? habits.data.length > 0
-                ? habits.data.map((habit) => (
-                    <div>
-                      {habit.title} - {habit.id}
-                    </div>
-                  ))
-                : "No habits"
-              : "Loading habits..."}
-          </div>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <p>{hello.data ? hello.data.greeting : "Loading tRPC query..."}</p>
-          <AuthShowcase />
-        </div>
+      {headMarkup}
+      <main className="h-full flex-col bg-gradient-to-b from-[#2e026d] to-[#15162c] p-10 text-white">
+        <Header />
+        <Content />
       </main>
     </>
   );
 };
 
-export default Home;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerAuthSession(context);
 
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
+  if (!session?.user.onboarded && !session?.user.skippedOnboarding) {
+    return {
+      redirect: { destination: "/get-started", permanent: false },
+      props: {},
+    };
+  }
 
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
-      </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-    </div>
-  );
+  return { props: {} };
 };
+
+export default Home;
