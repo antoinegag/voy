@@ -7,3 +7,7 @@ body,
 #__next {
   @apply h-full;
 }
+
+input[type] {
+  @apply bg-white/20 text-white;
+}

@@ -4,6 +4,9 @@ export default function Document() {
   return (
     <Html>
       <Head>
+        <title>Voy</title>
+        <meta name="description" content="The Voy App" />
+        <link rel="icon" href="/favicon.ico" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
