@@ -2,6 +2,8 @@
 
 A proof of concept web app to gnerate training plans for your sport with AI
 
+<img src="https://user-images.githubusercontent.com/25696312/222009246-b53a7c1e-b9bd-488f-a049-b9cda892800f.jpg" width="500" />
+
 ## Demo
 
 https://user-images.githubusercontent.com/25696312/222008305-1352467d-5f1c-473d-9038-29cd42eed2cc.mp4
